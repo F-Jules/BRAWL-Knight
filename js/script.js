@@ -222,7 +222,7 @@ document.onkeydown = function(event) {
     case 70: // F = ATTACK REDKNIGHT
       event.preventDefault();
       redKnight.atk = true;
-      if (redKnight.x > blueKnight.x - 15 && redKnight.x < blueKnight.x + 5) {
+      if (redKnight.x > blueKnight.x - 25 && redKnight.x < blueKnight.x + 15) {
         console.log("hit");
       }
       break;
