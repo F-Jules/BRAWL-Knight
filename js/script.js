@@ -12,7 +12,7 @@ var redKnight = {
   sheetWidth: 780,
   sheetHeight: 775,
   x: 0,
-  y: 0,
+  y: 620,
   cols: 5,
   rows: 5,
   width: 156,
@@ -26,7 +26,12 @@ var redKnight = {
   runRow: 1,
   jumpRow: 2,
   atkRow: 3,
-  dieRow: 4
+  dieRow: 4,
+  speed: 15,
+  xVelocity: 0,
+  yVelocity: 0,
+  damage: 5,
+  health: 30
 };
 
 var redKnightImg = new Image();
@@ -46,8 +51,18 @@ redKnightImg.onload = function() {
 };
 
 function updateRedKnightFrame() {
+  ctx.clearRect(redKnight.x, redKnight.y, redKnight.width, redKnight.height);
   redKnight.currentFrame = ++redKnight.currentFrame % redKnight.cols;
   redKnight.srcX = redKnight.currentFrame * redKnight.width;
+  redKnight.yVelocity += 4.5;
+  redKnight.x += redKnight.xVelocity;
+  redKnight.y += redKnight.yVelocity;
+  redKnight.xVelocity *= 0.9;
+  redKnight.yVelocity *= 0.9;
+  if (redKnight.y > 620) {
+    redKnight.y = 620;
+    redKnight.yVelocity = 0;
+  }
   if (redKnight.run) {
     redKnight.srcY = redKnight.runRow * redKnight.height;
   } else if (redKnight.jump) {
@@ -101,7 +116,12 @@ var blueKnight = {
   runRow: 1,
   jumpRow: 2,
   atkRow: 3,
-  dieRow: 4
+  dieRow: 4,
+  speed: 15,
+  xVelocity: 0,
+  yVelocity: 0,
+  damage: 5,
+  health: 30
 };
 
 var blueKnightImg = new Image();
@@ -127,6 +147,15 @@ function updateBlueKnightFrame() {
     blueKnight.width,
     blueKnight.height
   );
+  blueKnight.yVelocity += 4.5;
+  blueKnight.x += blueKnight.xVelocity;
+  blueKnight.y += blueKnight.yVelocity;
+  blueKnight.xVelocity *= 0.9;
+  blueKnight.yVelocity *= 0.9;
+  if (blueKnight.y > 620) {
+    blueKnight.y = 620;
+    blueKnight.yVelocity = 0;
+  }
   blueKnight.currentFrame = ++blueKnight.currentFrame % blueKnight.cols;
   blueKnight.srcX = blueKnight.currentFrame * blueKnight.width;
   if (blueKnight.run) {
@@ -178,30 +207,44 @@ document.onkeydown = function(event) {
   switch (event.keyCode) {
     case 68: //D = MOVE RIGHT REDKNIGHT
       event.preventDefault();
+      if (redKnight.x + redKnight.speed + redKnight.width < canvas.width) {
+        redKnight.x += redKnight.speed;
+      }
       redKnight.run = true;
-      redKnight.x += 20;
       break;
     case 65: // A = MOVE LEFT REDKNIGHT
       event.preventDefault();
+      if (redKnight.x - redKnight.speed > 0) {
+        redKnight.x -= redKnight.speed;
+      }
       redKnight.run = true;
-      redKnight.x -= 20;
       break;
     case 70: // F = ATTACK REDKNIGHT
       event.preventDefault();
       redKnight.atk = true;
+      if (redKnight.x > blueKnight.x - 15 && redKnight.x < blueKnight.x + 5) {
+        console.log("hit");
+      }
       break;
-    case 87: // E = JUMP REDKNIGHT
-      redKnight.jump = true;
+    case 87: // W = JUMP REDKNIGHT
+      if (redKnight.jump == false) {
+        redKnight.y -= 100;
+        redKnight.jump = true;
+      }
       break;
     case 39: //RIGHT ARROW = MOVE RIGHT BLUEKNIGHT
       event.preventDefault();
+      if (blueKnight.x + blueKnight.speed + blueKnight.width < canvas.width) {
+        blueKnight.x += blueKnight.speed;
+      }
       blueKnight.run = true;
-      blueKnight.x += 20;
       break;
     case 37: // LEFT ARROW = MOVE LEFT BLUEKNIGHT
       event.preventDefault();
+      if (blueKnight.x - blueKnight.speed > 0) {
+        blueKnight.x -= blueKnight.speed;
+      }
       blueKnight.run = true;
-      blueKnight.x -= 20;
       break;
     case 18: // ALTRIGHT = ATTACK BLUEKNIGHT
       event.preventDefault();
@@ -209,10 +252,17 @@ document.onkeydown = function(event) {
       break;
     case 38: // ARROW UP = JUMP BLUEKNIGHT
       event.preventDefault();
+      blueKnight.y -= 40;
       blueKnight.jump = true;
       break;
   }
 };
+
+document.onkeypress = function(event) {
+  switch (event.keyCode) {
+  }
+};
+
 document.onkeyup = function(event) {
   switch (event.keyCode) {
     case 68: //D = MOVE RIGHT REDKNIGHT
@@ -227,7 +277,7 @@ document.onkeyup = function(event) {
       event.preventDefault();
       redKnight.atk = false;
       break;
-    case 87: // E = JUMP REDKNIGHT
+    case 87: // W = JUMP REDKNIGHT
       redKnight.jump = false;
       break;
     case 39: //RIGHT ARROW = MOVE RIGHT BLUEKNIGHT
@@ -248,3 +298,22 @@ document.onkeyup = function(event) {
       break;
   }
 };
+
+// -------------------------- PHYSICS -------------------------------------------------------------------------
+
+function gravity(x, y, xVelocity, yVelocity) {
+  yVelocity += 1.5;
+  x += xVelocity;
+  y += yVelocity;
+  xVelocity *= 0.9;
+  yVelocity *= 0.9;
+}
+
+function collision(redKnight, blueKnight) {
+  return (
+    redKnight.y + redKnight.height >= blueKnight.y &&
+    redKnight.y <= blueKnight.y + blueKnight.height &&
+    redKnight.x + redKnight.width >= blueKnight.x &&
+    redKnight.x <= blueKnight.x + blueKnight.width
+  );
+}
