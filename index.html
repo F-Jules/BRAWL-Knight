@@ -4,16 +4,73 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <title>TEST JS CANVAS</title>
+    <title>KNIGHT BRAWL</title>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="./loading-bar/loading-bar.css"
+    />
+    <link rel="stylesheet" href="css/style.css" />
   </head>
-  <body>
-    <canvas
-      class="area"
-      style="border:1px solid #000"
-      width="1600"
-      height="775"
-    ></canvas>
 
+  <body>
+    <div id="titCont">
+      <div id="titre"><img src="images/tit.png" alt="" /></div>
+    </div>
+    <div id="cloudbg"></div>
+    <div id="container">
+      <div id="clouds">
+        <div class="cloud x1"></div>
+        <div class="cloud x2"></div>
+        <div class="cloud x3"></div>
+        <div class="cloud x4"></div>
+        <div class="cloud x5"></div>
+      </div>
+    </div>
+    <div class="lives">
+      <div id="lives-red">
+        LIVES REMAINING: <span class="livesRed-remaining"></span>
+      </div>
+      <div id="lives-blue">
+        LIVES REMAINING: <span class="livesBlue-remaining"></span>
+      </div>
+    </div>
+    <div class="canvasContainer"><canvas class="area"></canvas></div>
+
+    <div class="live-bar">
+      <div
+        class="ldBar ldBar-red"
+        data-value="100"
+        data-stroke="red"
+        data-preset="line"
+        style="width:300px;height:40px"
+        data-aspect-ratio="none"
+      ></div>
+      <div
+        class="ldBar ldBar-blue"
+        data-value="100"
+        data-stroke="blue"
+        data-preset="line"
+        style="width:300px;height:40px"
+        data-aspect-ratio="none"
+      ></div>
+    </div>
+
+    <div id="ground"></div>
+    <div id="grass"></div>
+    <div id="moutain"></div>
+    <div id="castle"></div>
+
+    <section class="game-end">
+      <div class="popup-content">
+        <div>
+          <h2>RED KNIGHT WINS</h2>
+          <button class="restart ">Play Again</button>
+        </div>
+      </div>
+    </section>
+
+    <script type="text/javascript" src="./loading-bar/loading-bar.js"></script>
     <script
       src="https://code.jquery.com/jquery-3.3.1.min.js"
       integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
