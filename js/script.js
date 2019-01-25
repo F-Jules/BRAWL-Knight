@@ -4,6 +4,7 @@ $(function drawStuff() {
 
   var red = {
     name: "red",
+    color: "#FA9E9E",
     srcX: 0,
     srcY: 0,
     sheetWidth: 780,
@@ -38,14 +39,15 @@ $(function drawStuff() {
     speed: 5,
     xVelocity: 0,
     yVelocity: 0,
-    damage: 5,
+    damage: 10,
     health: 100,
-    life: 5,
+    life: 3,
     image: "./images/redKnight.png"
   };
 
   var blue = {
     name: "blue",
+    color: "#90C9FF",
     srcX: 0,
     srcY: 0,
     sheetWidth: 780,
@@ -80,9 +82,9 @@ $(function drawStuff() {
     speed: 5,
     xVelocity: 0,
     yVelocity: 0,
-    damage: 5,
+    damage: 10,
     health: 100,
-    life: 5,
+    life: 3,
     image: "./images/blueKnight.png"
   };
 
@@ -104,7 +106,8 @@ $(function drawStuff() {
     DROITE: 39,
     GAUCHE: 37,
     HAUT: 38,
-    ALTGR: 18
+    ALTGR: 18,
+    SPACE: 32
   };
 
   var keys = [];
@@ -123,8 +126,18 @@ $(function drawStuff() {
     timeoutAttack: 0,
     swordBlue: 0,
     timeoutBlue: 0,
-    timeoutAttackBlue: 0
+    timeoutAttackBlue: 0,
+    jump: 0
   };
+
+  var kirbyMusic = new Audio(
+    "./sounds/kirbys-return-to-dream-land-title-theme-8-bit-remix.mp3"
+  );
+  var swordHit = new Audio("./sounds/Sword-swing.wav");
+  var deathKnight = new Audio("./sounds/Pain-SoundBible.com-1883168362.wav");
+  var applaude = new Audio(
+    "./sounds/SMALL_CROWD_APPLAUSE-Yannick_Lemieux-1268806408.wav"
+  );
 
   function drawLoop() {
     requestAnimationFrame(drawLoop);
@@ -205,10 +218,11 @@ $(function drawStuff() {
         if (Date.now() - lastFire["timeout"] > 50) {
           red.atkLeft = true;
           lastFire["sword"] = Date.now();
-          if (red.x > blue.x && red.x < blue.x + 65) {
+          if (red.x > blue.x && red.x < blue.x + 65 && red.y > blue.y - 60) {
             function slowKill() {
               if (Date.now() - lastFire["timeoutAttack"] > 250) {
                 blue.health -= red.damage;
+                swordHit.play();
                 lastFire["timeoutAttack"] = Date.now();
               } else return;
             }
@@ -220,10 +234,11 @@ $(function drawStuff() {
         if (Date.now() - lastFire["timeout"] > 50) {
           red.atkRight = true;
           lastFire["sword"] = Date.now();
-          if (red.x < blue.x && red.x > blue.x - 65) {
+          if (red.x < blue.x && red.x > blue.x - 65 && red.y > blue.y - 60) {
             function slowKill() {
               if (Date.now() - lastFire["timeoutAttack"] > 250) {
                 blue.health -= red.damage;
+                swordHit.play();
                 lastFire["timeoutAttack"] = Date.now();
               } else return;
             }
@@ -258,10 +273,11 @@ $(function drawStuff() {
         if (Date.now() - lastFire["timeoutBlue"] > 50) {
           blue.atkLeft = true;
           lastFire["swordBlue"] = Date.now();
-          if (blue.x > red.x && blue.x < red.x + 65) {
+          if (blue.x > red.x && blue.x < red.x + 65 && blue.y > red.y - 60) {
             function slowKill() {
               if (Date.now() - lastFire["timeoutAttackBlue"] > 250) {
                 red.health -= blue.damage;
+                swordHit.play();
                 lastFire["timeoutAttackBlue"] = Date.now();
               } else return;
             }
@@ -273,10 +289,11 @@ $(function drawStuff() {
         if (Date.now() - lastFire["timeoutBlue"] > 50) {
           blue.atkRight = true;
           lastFire["swordBlue"] = Date.now();
-          if (blue.x < red.x && blue.x > red.x - 65) {
+          if (blue.x < red.x && blue.x > red.x - 65 && blue.y > red.y - 60) {
             function slowKill() {
               if (Date.now() - lastFire["timeoutAttackBlue"] > 250) {
                 red.health -= blue.damage;
+                swordHit.play();
                 lastFire["timeoutAttackBlue"] = Date.now();
               } else return;
             }
@@ -324,51 +341,60 @@ $(function drawStuff() {
       }
     }
 
+    var jumpDelay = 550;
+
+    if (Date.now() - lastFire["jump"] > jumpDelay) {
+      if (red.y >= window.innerHeight - 280) {
+        red.jumpRight = false;
+        red.jumpLeft = false;
+      }
+      lastFire["jumpTimeout"] = Date.now();
+    }
+
     if (keys[map["W"]]) {
-      if (red.left) {
-        red.jumpLeft = true;
-        setTimeout(suiteUP1, 50);
-
-        function suiteUP1() {
-          red.y -= 30;
+      if (red.right && red.jumpRight == false) {
+        if (Date.now() - lastFire["jumpTimeout"] > jumpDelay + 250) {
         }
-        setTimeout(suiteUP2, 60);
-
-        function suiteUP2() {
-          red.y -= 20;
-        }
-        setTimeout(suiteUP3, 70);
-
-        function suiteUP3() {
-          red.y -= 10;
-        }
-        setTimeout(suiteUP4, 80);
-
-        function suiteUP4() {
-          red.y -= 5;
-        }
-        setTimeout(suiteUP5, 100);
-
-        function suiteUP5() {
-          red.y += 5;
-        }
+        red.jumpRight = true;
+        lastFire["jump"] = Date.now();
+        jumpGrad(red, delta);
       }
 
-      if (red.right) {
-        red.jumpRight = true;
-        red.y -= 30;
+      if (red.left && red.jumpLeft == false) {
+        if (Date.now() - lastFire["jumpTimeout"] > jumpDelay + 250) {
+        }
+        red.jumpLeft = true;
+        lastFire["jump"] = Date.now();
+        jumpGrad(red, delta);
       }
     }
 
+    if (Date.now() - lastFire["jump"] > jumpDelay) {
+      if (red.y >= window.innerHeight - 280) {
+        blue.jumpRight = false;
+        blue.jumpLeft = false;
+      }
+      lastFire["jumpTimeout"] = Date.now();
+    }
+
     if (keys[map["HAUT"]]) {
-      if (blue.right) {
-        blue.y -= 30;
+      if (blue.right && blue.jumpRight == false) {
+        if (Date.now() - lastFire["jumpTimeout"] > jumpDelay + 250) {
+        }
         blue.jumpRight = true;
+        lastFire["jump"] = Date.now();
+        jumpGrad(blue, delta);
       }
-      if (blue.left) {
-        blue.y -= 30;
+      if (blue.left && blue.jumpLeft == false) {
+        if (Date.now() - lastFire["jumpTimeout"] > jumpDelay + 250) {
+        }
         blue.jumpLeft = true;
+        lastFire["jump"] = Date.now();
+        jumpGrad(blue, delta);
       }
+    }
+    if (keys[map["SPACE"]]) {
+      kirbyMusic.play();
     }
   }
 
@@ -400,9 +426,31 @@ $(function drawStuff() {
     knight.standRight = knight.right;
     knight.runLeft = false;
     knight.runRight = false;
-    knight.jumpLeft = false;
-    knight.jumpRight = false;
-    /* attaque enlevée */
+    // knight.jumpLeft = false;
+    // knight.jumpRight = false;
+  }
+
+  function jumpGrad(knight, delta) {
+    setTimeout(suiteUP1, delta / 200);
+
+    function suiteUP1() {
+      knight.y -= 50;
+    }
+    setTimeout(suiteUP2, delta / 300);
+
+    function suiteUP2() {
+      knight.y -= 40;
+    }
+    setTimeout(suiteUP3, delta / 400);
+
+    function suiteUP3() {
+      knight.y -= 30;
+    }
+    setTimeout(suiteUP4, delta / 500);
+
+    function suiteUP4() {
+      knight.y -= 10;
+    }
   }
 
   // -------------------------- GRAVITIY ---------------------------------------
@@ -435,11 +483,18 @@ $(function drawStuff() {
     if (knight.health <= 0 && knight.life > 0) {
       knight.life -= 1;
       $(".lives" + capped + "-remaining").html(knight.life);
+      deathKnight.play();
     }
-    if (knight.life == 0) {
-      $(".game-end h2").html(capped + " has won");
-      $(".popup-content").css("background-color", knight.name);
+    if (red.life === 0) {
+      $(".game-end h2").html("BLUE HAS WON");
+      $(".popup-content").css("background-color", blue.color);
       $(".game-end").addClass("showing");
+      applaude.play();
+    } else if (blue.life === 0) {
+      $(".game-end h2").html("RED HAS WON");
+      $(".popup-content").css("background-color", red.color);
+      $(".game-end").addClass("showing");
+      applaude.play();
     }
   }
 
