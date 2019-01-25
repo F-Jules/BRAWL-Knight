@@ -1,31 +1,15 @@
 $(function drawStuff() {
-  var lifeRed = 5;
-  var lifeBlue = 5;
-
-  $(".livesRed-remaining").html(lifeRed);
-  $(".livesBlue-remaining").html(lifeBlue);
   var canvas = $(".area")[0];
   var ctx = canvas.getContext("2d");
 
-  ctx.mozImageSmoothingEnabled = true;
-  ctx.webkitImageSmoothingEnabled = true;
-  ctx.msImageSmoothingEnabled = true;
-  ctx.imageSmoothingEnabled = true;
-
-  setInterval(function() {
-    ctx.canvas.width = window.innerWidth - 50;
-    ctx.canvas.height = window.innerHeight;
-  }, 100);
-
-  var startPos = 200;
-
-  red = {
+  var red = {
+    name: "red",
     srcX: 0,
     srcY: 0,
     sheetWidth: 780,
     sheetHeight: 1395,
-    x: startPos - 60,
-    y: window.innerHeight - 750,
+    x: 145, // =============== CENTRE =============
+    y: 0,
     cols: 5,
     rows: 9,
     width: 156,
@@ -51,7 +35,7 @@ $(function drawStuff() {
     runRowLeft: 6,
     jumpRowLeft: 7,
     atkRowLeft: 8,
-    speed: 10,
+    speed: 5,
     xVelocity: 0,
     yVelocity: 0,
     damage: 5,
@@ -60,13 +44,14 @@ $(function drawStuff() {
     image: "./images/redKnight.png"
   };
 
-  blue = {
+  var blue = {
+    name: "blue",
     srcX: 0,
     srcY: 0,
     sheetWidth: 780,
     sheetHeight: 1395,
-    x: window.innerWidth - 356,
-    y: window.innerHeight - 750,
+    x: window.innerWidth - 350,
+    y: 0,
     cols: 5,
     rows: 9,
     width: 156,
@@ -92,7 +77,7 @@ $(function drawStuff() {
     runRowRight: 6,
     jumpRowRight: 7,
     atkRowRight: 8,
-    speed: 10,
+    speed: 5,
     xVelocity: 0,
     yVelocity: 0,
     damage: 5,
@@ -100,87 +85,14 @@ $(function drawStuff() {
     life: 5,
     image: "./images/blueKnight.png"
   };
+
   var redImg = new Image();
   redImg.src = red["image"];
-  redImg.onload = drawingKnight(red, redImg);
-
   var blueImg = new Image();
   blueImg.src = blue["image"];
-  blueImg.onload = drawingKnight(blue, blueImg);
 
-  function updateKnightFrame(knight) {
-    // ANIMATIONS FRAME -------------------------------------------
-    ctx.clearRect(knight.x, knight.y, knight.width, knight.height);
-    knight.currentFrame = ++knight.currentFrame % knight.cols;
-    knight.srcX = knight.currentFrame * knight.width;
-  }
-
-  function drawingKnight(knight, img) {
-    ctx.drawImage(
-      img,
-      knight.srcX,
-      knight.srcY,
-      knight.width,
-      knight.height,
-      knight.x,
-      knight.y,
-      knight.width,
-      knight.height
-    );
-  }
-
-  setInterval(function() {
-    updateKnightFrame(blue);
-    updateKnightFrame(red);
-    /* repositionnement si hors de la fenetre, par la droite */
-    // if (red.x + red.width > canvas.width) {
-    //   red.x = canvas.width - red.width;
-    // }
-    // if (blue.x + blue.width > canvas.width) {
-    //   blue.x = canvas.width - blue.width;
-    // }
-  }, 100);
-
-  // -------------------------- PLATFORMS -----------------------------------
-
-  // class Deck {
-  //   constructor(deckX, deckY, deckWidth, deckHeigth) {
-  //     this.x = deckX;
-  //     this.y = deckY;
-  //     this.width = deckWidth;
-  //     this.height = deckHeigth;
-  //   }
-  //   drawDeck() {
-  //     ctx.fillRect(this.x, this.y, this.width, this.height);
-  //   }
-  // }
-  // var deck1 = new Deck(250, 350, 250, 10);
-
-  // -------------------------- DRAWING LOOP -----------------------------------
-
-  function drawLoop() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawingKnight(red, redImg);
-    drawingKnight(blue, blueImg);
-    // // LIVES BARS -------------------------------------------
-    blueHealthBar();
-    redHealthBar();
-    // DEATH -------------------------------------------
-    death(red, blue);
-    respawn(red);
-    respawn(blue);
-    // GRAVITY, COLLISION AND FRICTION -------------------------------------------
-    gravity(red);
-    gravity(blue);
-    // ANIMATIONS ROWS -------------------------------------------
-    animations(red);
-    animations(blue);
-    requestAnimationFrame(drawLoop);
-  }
-
-  drawLoop();
-
-  // -------------------------- COMMANDS -------------------------------
+  var images = [redImg, blueImg];
+  var allKnights = [red, blue];
 
   var map = {
     A: 65,
@@ -197,16 +109,183 @@ $(function drawStuff() {
 
   var keys = [];
 
+  var fps = 60;
+  var interval = 1000 / fps;
+  var lastTime = new Date().getTime();
+  var currentTime;
+  var delta;
+
+  var lastFire = {
+    red: 0,
+    blue: 0,
+    sword: 0,
+    timeout: 0,
+    timeoutAttack: 0,
+    swordBlue: 0,
+    timeoutBlue: 0,
+    timeoutAttackBlue: 0
+  };
+
+  function drawLoop() {
+    requestAnimationFrame(drawLoop);
+    currentTime = new Date().getTime();
+    delta = currentTime - lastTime;
+    if (delta > interval) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (index = 0; index < allKnights.length; ++index) {
+        drawingKnight(allKnights[index], images[index]);
+        healthBars(allKnights[index]);
+        death(allKnights[index]);
+        respawn(allKnights[index]);
+        gravity(allKnights[index]);
+        animations(allKnights[index]);
+        frameUpdater(allKnights[index]);
+      }
+      update();
+      lastTime = currentTime - (delta % interval);
+    }
+  }
+
+  function drawingKnight(knight, img) {
+    ctx.drawImage(
+      img,
+      knight.srcX,
+      knight.srcY,
+      knight.width,
+      knight.height,
+      knight.x,
+      knight.y,
+      knight.width,
+      knight.height
+    );
+  }
+
+  drawLoop();
+
+  function frameUpdater(knight) {
+    if (Date.now() - lastFire[knight.name] > 65) {
+      // vitesse des anims
+      knight.currentFrame = ++knight.currentFrame % knight.cols; // ============== FRAME UPDATER -- SORTIT DE ANIMATIONS (my bad) ==============
+      lastFire[knight.name] = Date.now();
+    }
+  }
+
+  // -------------------------- COMMANDS -------------------------------
+
   document.body.addEventListener("keydown", function(e) {
     keys[e.keyCode] = true;
   });
   document.body.addEventListener("keyup", function(e) {
     keys[e.keyCode] = false;
-    resetAnimations(red);
-    resetAnimations(blue);
+    for (index = 0; index < allKnights.length; ++index) {
+      resetAnimations(allKnights[index]);
+    }
   });
 
   function update() {
+    var someDelay = 200;
+
+    /* ROUGE ATTACK */
+    if (red.atkLeft == true && Date.now() - lastFire["sword"] > someDelay) {
+      // Permet de terminer un loop d'anim de frappe
+      if (red.currentFrame == 0) {
+        red.atkLeft = false;
+      }
+      lastFire["timeout"] = Date.now();
+    }
+    if (red.atkRight == true && Date.now() - lastFire["sword"] > someDelay) {
+      // Permet de terminer un loop d'anim de frappe
+      if (red.currentFrame == 0) {
+        red.atkRight = false;
+      }
+      lastFire["timeout"] = Date.now();
+    }
+    if (keys[map["F"]]) {
+      if (red.left == true) {
+        if (Date.now() - lastFire["timeout"] > 50) {
+          red.atkLeft = true;
+          lastFire["sword"] = Date.now();
+          if (red.x > blue.x && red.x < blue.x + 65) {
+            function slowKill() {
+              if (Date.now() - lastFire["timeoutAttack"] > 250) {
+                blue.health -= red.damage;
+                lastFire["timeoutAttack"] = Date.now();
+              } else return;
+            }
+            slowKill();
+          }
+        }
+      }
+      if (red.right == true) {
+        if (Date.now() - lastFire["timeout"] > 50) {
+          red.atkRight = true;
+          lastFire["sword"] = Date.now();
+          if (red.x < blue.x && red.x > blue.x - 65) {
+            function slowKill() {
+              if (Date.now() - lastFire["timeoutAttack"] > 250) {
+                blue.health -= red.damage;
+                lastFire["timeoutAttack"] = Date.now();
+              } else return;
+            }
+            slowKill();
+          }
+        }
+      }
+    }
+    /* BLEU ATTACK */
+    if (
+      blue.atkLeft == true &&
+      Date.now() - lastFire["swordBlue"] > someDelay
+    ) {
+      // Permet de terminer un loop d'anim de frappe
+      if (blue.currentFrame == 0) {
+        blue.atkLeft = false;
+      }
+      lastFire["timeoutBlue"] = Date.now();
+    }
+    if (
+      blue.atkRight == true &&
+      Date.now() - lastFire["swordBlue"] > someDelay
+    ) {
+      // Permet de terminer un loop d'anim de frappe
+      if (blue.currentFrame == 0) {
+        blue.atkRight = false;
+      }
+      lastFire["timeoutBlue"] = Date.now();
+    }
+    if (keys[map["ALTGR"]]) {
+      if (blue.left == true) {
+        if (Date.now() - lastFire["timeoutBlue"] > 50) {
+          blue.atkLeft = true;
+          lastFire["swordBlue"] = Date.now();
+          if (blue.x > red.x && blue.x < red.x + 65) {
+            function slowKill() {
+              if (Date.now() - lastFire["timeoutAttackBlue"] > 250) {
+                red.health -= blue.damage;
+                lastFire["timeoutAttackBlue"] = Date.now();
+              } else return;
+            }
+            slowKill();
+          }
+        }
+      }
+      if (blue.right == true) {
+        if (Date.now() - lastFire["timeoutBlue"] > 50) {
+          blue.atkRight = true;
+          lastFire["swordBlue"] = Date.now();
+          if (blue.x < red.x && blue.x > red.x - 65) {
+            function slowKill() {
+              if (Date.now() - lastFire["timeoutAttackBlue"] > 250) {
+                red.health -= blue.damage;
+                lastFire["timeoutAttackBlue"] = Date.now();
+              } else return;
+            }
+            slowKill();
+          }
+        }
+      }
+    }
+    /* END ATTACK */
     if (keys[map["A"]]) {
       red.right = false;
       red.left = true;
@@ -226,6 +305,7 @@ $(function drawStuff() {
     }
 
     if (keys[map["D"]]) {
+      red.atkLeft = false; // attack animation fix
       red.left = false;
       red.right = true;
       red.runRight = true;
@@ -235,6 +315,7 @@ $(function drawStuff() {
     }
 
     if (keys[map["DROITE"]]) {
+      blue.atkLeft = false; // attack animation fix
       blue.left = false;
       blue.right = true;
       blue.runRight = true;
@@ -244,67 +325,57 @@ $(function drawStuff() {
     }
 
     if (keys[map["W"]]) {
-      if (red.left && red.jumpLeft == false) {
+      if (red.left) {
         red.jumpLeft = true;
-        red.y -= 100;
+        setTimeout(suiteUP1, 50);
+
+        function suiteUP1() {
+          red.y -= 30;
+        }
+        setTimeout(suiteUP2, 60);
+
+        function suiteUP2() {
+          red.y -= 20;
+        }
+        setTimeout(suiteUP3, 70);
+
+        function suiteUP3() {
+          red.y -= 10;
+        }
+        setTimeout(suiteUP4, 80);
+
+        function suiteUP4() {
+          red.y -= 5;
+        }
+        setTimeout(suiteUP5, 100);
+
+        function suiteUP5() {
+          red.y += 5;
+        }
       }
-      if (red.right && red.jumpRight == false) {
+
+      if (red.right) {
         red.jumpRight = true;
-        red.y -= 100;
-        console.log(red.y);
+        red.y -= 30;
       }
     }
 
     if (keys[map["HAUT"]]) {
-      if (blue.right && blue.jumpRight == false) {
-        blue.y -= 100;
+      if (blue.right) {
+        blue.y -= 30;
         blue.jumpRight = true;
-        console.log(blue.y);
       }
-      if (blue.left && blue.jumpLeft == false) {
-        blue.y -= 100;
+      if (blue.left) {
+        blue.y -= 30;
         blue.jumpLeft = true;
-      }
-    }
-
-    if (keys[map["F"]]) {
-      if (red.left == true) {
-        red.atkLeft = true;
-        if (red.x < blue.x + 65 && red.x > blue.x) {
-          blue.health -= red.damage;
-        }
-      }
-      if (red.right == true) {
-        red.atkRight = true;
-        if (red.x > blue.x - 65 && red.x < blue.x) {
-          blue.health -= red.damage;
-        }
-      }
-    }
-
-    if (keys[map["ALTGR"]]) {
-      if (blue.left == true) {
-        blue.atkLeft = true;
-        if (red.x < blue.x + 65 && red.x < blue.x) {
-          red.health -= blue.damage;
-        }
-      }
-      if (blue.right == true) {
-        blue.atkRight = true;
-        if (red.x > blue.x - 65 && red.x > blue.x) {
-          red.health -= blue.damage;
-        }
       }
     }
   }
 
-  setInterval(function() {
-    update();
-  }, 50);
-
   // -------------------------- ANIMATIONS ROWS -------------------------------------------------------------------------
 
   function animations(knight) {
+    knight.srcX = knight.currentFrame * knight.width;
     if (knight.runLeft) {
       knight.srcY = knight.runRowLeft * knight.height;
     } else if (knight.jumpLeft) {
@@ -326,27 +397,15 @@ $(function drawStuff() {
 
   function resetAnimations(knight) {
     knight.standLeft = knight.left;
-    knight.runLeft = false;
-    knight.atkLeft = false;
-    knight.jumpLeft = false;
-
     knight.standRight = knight.right;
+    knight.runLeft = false;
     knight.runRight = false;
-    knight.atkRight = false;
+    knight.jumpLeft = false;
     knight.jumpRight = false;
+    /* attaque enlevée */
   }
 
-  // function jumpReset(knight) {
-  //   if (
-  //     knight.jumpLeft == true ||
-  //     knight.jumpRight == true ||
-  //     knight.y != window.innerHeight - 750
-  //   ) {
-
-  //   }
-  // }
-
-  // -------------------------- GRAVITIY -------------------------------------------------------------------------
+  // -------------------------- GRAVITIY ---------------------------------------
 
   function gravity(knight) {
     knight.yVelocity += 1.5;
@@ -360,53 +419,34 @@ $(function drawStuff() {
     }
   }
 
-  // function collision(knight, plat) {
-  //   return (
-  //     knight.y + knight.height >= plat.y &&
-  //     knight.y <= plat.y + blue.height &&
-  //     knight.x + knight.width >= plat.x &&
-  //     knight.x <= plat.x + plat.width
-  //   );
-  // }
+  // -------------------------- LIFE (& DEATH) ---------------------------------
 
-  // function checkCollision() {
-  //   if (collision(red, deck1) === true) {
-  //     red.y = deck1.y;
-  //   }
-  // }
-
-  // -------------------------- DEATH -------------------------------------------------------------------------
+  function healthBars(knight) {
+    var hp1 = $(".ldBar-" + knight.name)[0];
+    var hp = new ldBar(hp1);
+    hp.set(knight.health);
+  }
 
   function death(knight) {
-    if (knight.health <= 0) {
-      knight.die = true;
-      knight.srcY = knight.dieRow * knight.height;
+    var capped = capitalize(knight.name);
+    if (!$(".lives" + capped + "-remaining").html()) {
+      $(".lives" + capped + "-remaining").html(knight.life);
     }
-    if (red.health <= 0 && red.life > 0) {
-      lifeRed -= 1;
-      red.life -= 1;
-      $(".livesRed-remaining").html(lifeRed);
+    if (knight.health <= 0 && knight.life > 0) {
+      knight.life -= 1;
+      $(".lives" + capped + "-remaining").html(knight.life);
     }
-    if (blue.health <= 0 && blue.life > 0) {
-      lifeBlue -= 1;
-      blue.life -= 1;
-      $(".livesBlue-remaining").html(lifeBlue);
-    }
-    if (red.life == 0) {
-      $(".game-end h2").html("BLUE KNIGHT HAS WON");
-      $(".popup-content").css("background-color", "blue");
-      // $(".restart").addClass("blue");
-      $(".game-end").addClass("showing");
-    }
-    if (blue.life == 0) {
-      $(".game-end h2").html("RED KNIGHT HAS WON");
-      $(".popup-content").css("background-color", "red");
-      // $(".restart").addClass("red");
+    if (knight.life == 0) {
+      $(".game-end h2").html(capped + " has won");
+      $(".popup-content").css("background-color", knight.name);
       $(".game-end").addClass("showing");
     }
   }
 
   function respawn(knight) {
+    if (knight.life == 0) {
+      return;
+    }
     if (knight.health <= 0) {
       knight.die = false;
       knight.reset = function() {
@@ -418,29 +458,25 @@ $(function drawStuff() {
     }
   }
 
+  /* other help functions */
+
+  ctx.canvas.width = window.innerWidth - 50;
+  ctx.canvas.height = window.innerHeight;
+  $(window).on("resize", function() {
+    for (index = 0; index < allKnights.length; ++index) {
+      if (allKnights[index].x + allKnights[index].width > canvas.width) {
+        allKnights[index].x = canvas.width - allKnights[index].width;
+      }
+    }
+    ctx.canvas.width = window.innerWidth - 50;
+    ctx.canvas.height = window.innerHeight;
+  });
+
+  function capitalize(s) {
+    return s && s[0].toUpperCase() + s.slice(1);
+  }
+
   $(".restart").click(function() {
     location.reload();
   });
-
-  // -------------------------- HEALTH BAR -------------------------------------------------------------------------
-
-  function redHealthBar() {
-    $(document).ready(function() {
-      var rk1 = $(".ldBar-red")[0];
-      var rk = new ldBar(rk1);
-      rk.set(red.health);
-    });
-  }
-
-  function blueHealthBar() {
-    $(document).ready(function() {
-      var bk1 = $(".ldBar-blue")[0];
-      var bk = new ldBar(bk1);
-      bk.set(blue.health);
-    });
-  }
-
-  console.log(window.innerHeight);
-  console.log(red.y);
-  console.log(blue.y);
 });

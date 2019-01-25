@@ -28,17 +28,18 @@ h1 {
   font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
   font-size: 2rem;
   width: 100%;
-  padding-top: 25px;
+  padding-top: 10px;
+  text-transform: uppercase;
 }
 
 #lives-red {
-  color: red;
+  color: rgb(255, 255, 255);
   float: left;
   padding-left: 35px;
 }
 
 #lives-blue {
-  color: blue;
+  color: rgb(255, 255, 255);
   float: right;
   padding-right: 35px;
 }
@@ -169,11 +170,11 @@ body {
   -moz-animation: moveclouds 40s linear infinite;
   -o-animation: moveclouds 40s linear infinite;
   animation: moveclouds 40s linear infinite;
+  top: 110px;
 }
 
 .x2 {
   left: 200px;
-
   -webkit-transform: scale(0.6);
   -moz-transform: scale(0.6);
   transform: scale(0.6);
@@ -186,13 +187,11 @@ body {
 
 .x3 {
   left: -250px;
-  top: -200px;
-
+  top: 100px;
   -webkit-transform: scale(0.8);
   -moz-transform: scale(0.8);
   transform: scale(0.8);
   opacity: 0.9;
-
   -webkit-animation: moveclouds 22s linear infinite;
   -moz-animation: moveclouds 22s linear infinite;
   -o-animation: moveclouds 22s linear infinite;
@@ -201,13 +200,11 @@ body {
 
 .x4 {
   left: 470px;
-  top: -250px;
-
+  top: 75px;
   -webkit-transform: scale(0.75);
   -moz-transform: scale(0.75);
   transform: scale(0.75);
   opacity: 0.75;
-
   -webkit-animation: moveclouds 28s linear infinite;
   -moz-animation: moveclouds 28s linear infinite;
   -o-animation: moveclouds 28s linear infinite;
@@ -216,7 +213,7 @@ body {
 
 .x5 {
   left: -150px;
-  top: -150px;
+  top: 35px;
 
   -webkit-transform: scale(0.8);
   -moz-transform: scale(0.8);
@@ -269,9 +266,9 @@ body {
 .ldBar-red {
   position: fixed;
   left: 23px;
-  bottom: 85px;
+  bottom: 35px;
   font-size: 25px;
-  color: red;
+  color: rgb(255, 255, 255);
   font-weight: 800;
   font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
 }
@@ -280,9 +277,9 @@ body {
   position: fixed;
   text-align: right;
   right: 23px;
-  bottom: 85px;
+  bottom: 35px;
   font-size: 25px;
-  color: blue;
+  color: rgb(255, 255, 255);
   font-weight: 080;
   font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
 }
@@ -338,12 +335,62 @@ h2 {
 
 /* ________________________ BUTTON _________________________________________________________ */
 
-/* ________________________ RESPONSIVE_________________________________________________________ */
+#trapezoid {
+  border-top: 115px solid rgb(248, 248, 242);
+  border-left: 30px solid transparent;
+  border-right: 30px solid transparent;
+  height: 0;
+  width: 350px;
+  clear: both;
+  position: fixed;
+  top: 0;
+  display: flex;
+  justify-content: center;
+}
 
-@media only screen and (max-width: 1100px) {
-  .lives {
-    font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
-    font-size: 1.5rem;
-    padding-top: 105px;
-  }
+#trapezoid img {
+  position: fixed;
+  top: 5px;
+  z-index: 6358468843682686;
+  height: 100px;
+  width: 250px;
+}
+
+.tops {
+  height: 60px;
+  width: 90%;
+  -moz-box-shadow: 0 0 5px 0 #999;
+  -webkit-box-shadow: 0 0 5px 0 #999;
+  box-shadow: 0 0 5px 0 #999;
+}
+
+#left {
+  background-color: rgb(250, 158, 158);
+  float: left;
+}
+
+#right {
+  background-color: rgb(144, 201, 255);
+  float: right;
+}
+
+.docks {
+  z-index: -5;
+  border-left: 30px solid transparent;
+  border-right: 30px solid transparent;
+  height: 0;
+  width: 365px;
+  clear: both;
+  position: fixed;
+  bottom: 0;
+}
+
+#dock-left {
+  left: -50px;
+  border-bottom: 85px solid rgb(250, 158, 158);
+}
+
+#dock-right {
+  right: -50px;
+  border-bottom: 85px solid rgb(144, 201, 255);
 }

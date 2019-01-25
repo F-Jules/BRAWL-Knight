@@ -15,8 +15,11 @@
 
   <body>
     <div id="titCont">
-      <div id="titre"><img src="images/tit.png" alt="" /></div>
+      <div class="tops" id="left"></div>
+      <div id="trapezoid"><img src="images/brawl.png" alt="" /></div>
+      <div class="tops" id="right"></div>
     </div>
+
     <div id="cloudbg"></div>
     <div id="container">
       <div id="clouds">
@@ -29,10 +32,10 @@
     </div>
     <div class="lives">
       <div id="lives-red">
-        LIVES REMAINING: <span class="livesRed-remaining"></span>
+        Lives remaining : <span class="livesRed-remaining"></span>
       </div>
       <div id="lives-blue">
-        LIVES REMAINING: <span class="livesBlue-remaining"></span>
+        <span class="livesBlue-remaining"></span> : Lives remaining
       </div>
     </div>
     <div class="canvasContainer"><canvas class="area"></canvas></div>
@@ -41,7 +44,7 @@
       <div
         class="ldBar ldBar-red"
         data-value="100"
-        data-stroke="red"
+        data-stroke="white"
         data-preset="line"
         style="width:300px;height:40px"
         data-aspect-ratio="none"
@@ -49,7 +52,7 @@
       <div
         class="ldBar ldBar-blue"
         data-value="100"
-        data-stroke="blue"
+        data-stroke="white"
         data-preset="line"
         style="width:300px;height:40px"
         data-aspect-ratio="none"
@@ -60,6 +63,9 @@
     <div id="grass"></div>
     <div id="moutain"></div>
     <div id="castle"></div>
+
+    <div class="docks" id="dock-left"></div>
+    <div class="docks" id="dock-right"></div>
 
     <section class="game-end">
       <div class="popup-content">
