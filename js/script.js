@@ -9,7 +9,7 @@ $(function drawStuff() {
     srcY: 0,
     sheetWidth: 780,
     sheetHeight: 1395,
-    x: 145, // =============== CENTRE =============
+    x: 145,
     y: 0,
     cols: 5,
     rows: 9,
@@ -183,8 +183,6 @@ $(function drawStuff() {
     }
   }
 
-  // -------------------------- COMMANDS -------------------------------
-
   document.body.addEventListener("keydown", function(e) {
     keys[e.keyCode] = true;
   });
@@ -303,7 +301,7 @@ $(function drawStuff() {
       }
     }
     /* END ATTACK */
-    if (keys[map["A"]]) {
+    if (keys[map["A"]] || keys[map["Q"]]) {
       red.right = false;
       red.left = true;
       red.runLeft = true;
@@ -351,7 +349,7 @@ $(function drawStuff() {
       lastFire["jumpTimeout"] = Date.now();
     }
 
-    if (keys[map["W"]]) {
+    if (keys[map["W"]] || keys[map["Z"]]) {
       if (red.right && red.jumpRight == false) {
         if (Date.now() - lastFire["jumpTimeout"] > jumpDelay + 250) {
         }
